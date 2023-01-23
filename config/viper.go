@@ -3,12 +3,11 @@ package config
 import "github.com/spf13/viper"
 
 type EnvVars struct {
-	AUTH0_DOMAIN   string `mapstructure:"AUTH0_DOMAIN"`
-	AUTH0_AUDIENCE string `mapstructure:"AUTH0_DOMAIN"`
-	PORT           string `mapstructure:"AUTH0_DOMAIN"`
+	PORT    string `mapstructure:"PORT"`
+	JWT_KEY string `mapstructure:"JWT_KEY"`
 }
 
-func load(config EnvVars, err error) {
+func LoadConfig() (config EnvVars, err error) {
 	viper.AddConfigPath(".")
 	viper.SetConfigName("app")
 	viper.SetConfigType("env")
@@ -20,7 +19,7 @@ func load(config EnvVars, err error) {
 		return
 	}
 
-	// validation
+	// TODO: add validation
 
 	err = viper.Unmarshal(&config)
 	return
