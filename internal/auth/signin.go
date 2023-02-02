@@ -5,35 +5,37 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/xrexy/togo/pkg/database/models"
 )
-
-type Credentials struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-var users = map[string]string{
-	"user1@gmail.com": "userpass",
-	"user2@gmail.com": "userpass",
-}
 
 type Claims struct {
 	Email string `json:"email"`
 	jwt.RegisteredClaims
 }
 
-func (a *AuthController) Signin(c *fiber.Ctx) error {
-	var creds Credentials
-	if err := c.BodyParser(&creds); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+// Signin godoc
+// @Summary Sign in
+// @Description Authenticates a user and returns a JWT token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param credentials body models.Credentials true "Credentials"
+// @Success 200 {object} AuthOKResponse
+// @Failure 401 {object} AuthUnauthorizedResponse
+// @Failure 500 {object} AuthInternalServerErrorResponse
+// @Router /signin [post]
+func (ac *AuthController) Signin(ctx *fiber.Ctx) error {
+	var creds models.Credentials
+	if err := ctx.BodyParser(&creds); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid credentials",
 		})
 	}
 
-	expectedPassword, ok := users[creds.Email]
+	expectedPassword, ok := ac.users[creds.Email]
 	if !ok || expectedPassword != creds.Password {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": "Invalid credentials",
+		return ctx.Status(fiber.StatusUnauthorized).JSON(AuthUnauthorizedResponse{
+			Message: "Invalid credentials",
 		})
 	}
 
@@ -46,21 +48,21 @@ func (a *AuthController) Signin(c *fiber.Ctx) error {
 		},
 	})
 
-	tokenString, err := token.SignedString(a.jwt)
+	tokenString, err := token.SignedString(ac.jwt)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Could not sign the token",
+		return ctx.Status(fiber.StatusInternalServerError).JSON(AuthInternalServerErrorResponse{
+			Message: "Error signing token",
 		})
 	}
 
-	c.Cookie(&fiber.Cookie{
+	ctx.Cookie(&fiber.Cookie{
 		Name:    "token",
 		Value:   tokenString,
 		Expires: expTime,
 	})
 
-	return c.JSON(fiber.Map{
-		"message": "success",
-		"token":   tokenString,
+	return ctx.Status(fiber.StatusOK).JSON(AuthOKResponse{
+		Message: "success",
+		Token:   tokenString,
 	})
 }

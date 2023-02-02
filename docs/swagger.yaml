@@ -1,4 +1,65 @@
+basePath: /
+definitions:
+  auth.AuthInternalServerErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  auth.AuthOKResponse:
+    properties:
+      message:
+        type: string
+      token:
+        type: string
+    type: object
+  auth.AuthUnauthorizedResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  models.Credentials:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+host: localhost:8080
 info:
   contact: {}
-paths: {}
+  description: To-Go is a simple API for managing tasks. It is built with Fiber and
+    GORM.
+  title: To-Go API
+  version: 0.1-alpha
+paths:
+  /signin:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns a JWT token
+      parameters:
+      - description: Credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/models.Credentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.AuthOKResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/auth.AuthUnauthorizedResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/auth.AuthInternalServerErrorResponse'
+      summary: Sign in
+      tags:
+      - auth
 swagger: "2.0"

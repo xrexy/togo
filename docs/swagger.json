@@ -1,7 +1,99 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "To-Go is a simple API for managing tasks. It is built with Fiber and GORM.",
+        "title": "To-Go API",
+        "contact": {},
+        "version": "0.1-alpha"
     },
-    "paths": {}
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/signin": {
+            "post": {
+                "description": "Authenticates a user and returns a JWT token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Sign in",
+                "parameters": [
+                    {
+                        "description": "Credentials",
+                        "name": "credentials",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Credentials"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth.AuthOKResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/auth.AuthUnauthorizedResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/auth.AuthInternalServerErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "auth.AuthInternalServerErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.AuthOKResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.AuthUnauthorizedResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Credentials": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        }
+    }
 }

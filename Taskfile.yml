@@ -4,3 +4,6 @@ tasks:
   dev:
     cmds:
       - air
+  docs:
+    cmds:
+      - swag i --d ./cmd/http,./pkg/database/models,./internal/auth
