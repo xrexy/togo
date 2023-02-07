@@ -37,12 +37,16 @@ func main() {
 }
 
 func run(env config.EnvVars) (func(), error) {
+	err := database.StartPostgresDB(&env)
+	if err != nil {
+		panic(err)
+	}
+
 	app := buildServer(env)
 
 	// start the server
 	go func() {
 		app.Listen("0.0.0.0:" + env.PORT)
-		database.StartPostgresDB(&env)
 	}()
 
 	// return a cleanup function to be called on shutdown
