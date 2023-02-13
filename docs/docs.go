@@ -36,7 +36,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Credentials"
+                            "$ref": "#/definitions/auth.Credentials"
                         }
                     }
                 ],
@@ -44,19 +44,65 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/auth.AuthOKResponse"
+                            "$ref": "#/definitions/auth.SignInOKResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid credentials format",
+                        "schema": {
+                            "$ref": "#/definitions/auth.AuthMessageStruct"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/auth.AuthUnauthorizedResponse"
+                            "$ref": "#/definitions/auth.AuthMessageStruct"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error while signing token",
                         "schema": {
-                            "$ref": "#/definitions/auth.AuthInternalServerErrorResponse"
+                            "$ref": "#/definitions/auth.AuthMessageStruct"
+                        }
+                    }
+                }
+            }
+        },
+        "/signup": {
+            "post": {
+                "description": "Creates a new user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Sign up",
+                "parameters": [
+                    {
+                        "description": "Credentials",
+                        "name": "credentials",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.Credentials"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth.SignUpOKResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "User already exists",
+                        "schema": {
+                            "$ref": "#/definitions/auth.AuthMessageStruct"
                         }
                     }
                 }
@@ -64,41 +110,50 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "auth.AuthInternalServerErrorResponse": {
+        "auth.AuthMessageStruct": {
             "type": "object",
             "properties": {
-                "message": {
-                    "type": "string"
+                "created_at": {
+                    "type": "string",
+                    "example": "1620000000"
+                },
+                "error_code": {
+                    "type": "integer",
+                    "example": 400
+                },
+                "error_message": {
+                    "type": "string",
+                    "example": "User already exists"
                 }
             }
         },
-        "auth.AuthOKResponse": {
+        "auth.Credentials": {
             "type": "object",
             "properties": {
-                "message": {
-                    "type": "string"
+                "email": {
+                    "type": "string",
+                    "example": "example@togo.dev"
                 },
+                "password": {
+                    "type": "string",
+                    "example": "my_super_secret_password"
+                }
+            }
+        },
+        "auth.SignInOKResponse": {
+            "type": "object",
+            "properties": {
                 "token": {
                     "type": "string"
                 }
             }
         },
-        "auth.AuthUnauthorizedResponse": {
+        "auth.SignUpOKResponse": {
             "type": "object",
             "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.Credentials": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
+                "token": {
+                    "type": "string",
+                    "example": "uuidv4"
                 }
             }
         }

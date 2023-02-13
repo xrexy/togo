@@ -1,27 +1,35 @@
 basePath: /
 definitions:
-  auth.AuthInternalServerErrorResponse:
+  auth.AuthMessageStruct:
     properties:
-      message:
+      created_at:
+        example: "1620000000"
+        type: string
+      error_code:
+        example: 400
+        type: integer
+      error_message:
+        example: User already exists
         type: string
     type: object
-  auth.AuthOKResponse:
+  auth.Credentials:
     properties:
-      message:
+      email:
+        example: example@togo.dev
         type: string
+      password:
+        example: my_super_secret_password
+        type: string
+    type: object
+  auth.SignInOKResponse:
+    properties:
       token:
         type: string
     type: object
-  auth.AuthUnauthorizedResponse:
+  auth.SignUpOKResponse:
     properties:
-      message:
-        type: string
-    type: object
-  models.Credentials:
-    properties:
-      email:
-        type: string
-      password:
+      token:
+        example: uuidv4
         type: string
     type: object
 host: localhost:8080
@@ -43,23 +51,53 @@ paths:
         name: credentials
         required: true
         schema:
-          $ref: '#/definitions/models.Credentials'
+          $ref: '#/definitions/auth.Credentials'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/auth.AuthOKResponse'
+            $ref: '#/definitions/auth.SignInOKResponse'
+        "400":
+          description: Invalid credentials format
+          schema:
+            $ref: '#/definitions/auth.AuthMessageStruct'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/auth.AuthUnauthorizedResponse'
+            $ref: '#/definitions/auth.AuthMessageStruct'
         "500":
-          description: Internal Server Error
+          description: Internal server error while signing token
           schema:
-            $ref: '#/definitions/auth.AuthInternalServerErrorResponse'
+            $ref: '#/definitions/auth.AuthMessageStruct'
       summary: Sign in
+      tags:
+      - auth
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user
+      parameters:
+      - description: Credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/auth.Credentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.SignUpOKResponse'
+        "400":
+          description: User already exists
+          schema:
+            $ref: '#/definitions/auth.AuthMessageStruct'
+      summary: Sign up
       tags:
       - auth
 swagger: "2.0"

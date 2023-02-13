@@ -1,6 +1,9 @@
 package main
 
 import (
+	"html/template"
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -55,6 +58,11 @@ func run(env config.EnvVars) (func(), error) {
 	}, nil
 }
 
+type HealthResponse struct {
+	Status    string `json:"status"`
+	Timestamp int64  `json:"timestamp"`
+}
+
 func buildServer(env config.EnvVars) *fiber.App {
 	app := fiber.New()
 
@@ -66,15 +74,48 @@ func buildServer(env config.EnvVars) *fiber.App {
 		TimeZone:   "Europe/Sofia",
 	}))
 
-	app.Get("/health", func(c *fiber.Ctx) error {
-		return c.SendString("OK")
-	})
+	app.Get("/docs/*", swagger.New(swagger.Config{
+		Title:  "To-Go API Docs",
+		Layout: "StandaloneLayout",
+		Plugins: []template.JS{
+			template.JS("SwaggerUIBundle.plugins.DownloadUrl"),
+		},
+		Presets: []template.JS{
+			template.JS("SwaggerUIBundle.presets.apis"),
+			template.JS("SwaggerUIStandalonePreset"),
+		},
+		DeepLinking:              true,
+		DefaultModelsExpandDepth: 1,
+		DefaultModelExpandDepth:  1,
+		DefaultModelRendering:    "example",
+		DocExpansion:             "list",
+		SyntaxHighlight: &swagger.SyntaxHighlightConfig{
+			Activate: true,
+			Theme:    "nord",
+		},
+		ShowMutatedRequest: true,
+	}))
 
-	app.Get("/docs/*", swagger.HandlerDefault)
+	v1 := app.Group("/api/v1")
+
+	// health check
+	// @Summary Health check
+	// @Description Checks if the server is up and running
+	// @Tags health
+	// @Accept json
+	// @Produce json
+	// @Success 200 {object} HealthResponse
+	// @Router /health [get]
+	v1.Get("/health", func(ctx *fiber.Ctx) error {
+		return ctx.Status(fiber.StatusOK).JSON(HealthResponse{
+			Status:    "OK",
+			Timestamp: time.Now().Unix(),
+		})
+	})
 
 	// create auth domain
 	authController := auth.NewAuthController(env)
-	auth.CreateAuthGroup(app, authController, env)
+	auth.CreateAuthGroup(v1, authController, env)
 
 	return app
 }

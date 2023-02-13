@@ -5,8 +5,8 @@ import (
 	"github.com/xrexy/togo/config"
 )
 
-func CreateAuthGroup(app *fiber.App, authController *AuthController, config config.EnvVars) {
-	auth := app.Group("/auth")
+func CreateAuthGroup(router fiber.Router, authController *AuthController, config config.EnvVars) {
+	auth := router.Group("/auth")
 	auth.Post("/signin", authController.Signin)
 	auth.Post("/signup", authController.Signup)
 }

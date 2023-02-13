@@ -6,4 +6,4 @@ tasks:
       - air
   docs:
     cmds:
-      - swag i --d ./cmd/http,./pkg/database/models,./internal/auth
+      - swag i --d ./cmd/http,./internal/auth
