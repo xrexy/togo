@@ -1,0 +1,154 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "To-Go is a simple API for managing tasks. It is built with Fiber and GORM.",
+        "title": "To-Go API",
+        "contact": {},
+        "version": "0.1-alpha"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/signin": {
+            "post": {
+                "description": "Authenticates a user and returns a JWT token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Sign in",
+                "parameters": [
+                    {
+                        "description": "Credentials",
+                        "name": "credentials",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.Credentials"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth.SignInOKResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid credentials format",
+                        "schema": {
+                            "$ref": "#/definitions/auth.AuthMessageStruct"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/auth.AuthMessageStruct"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error while signing token",
+                        "schema": {
+                            "$ref": "#/definitions/auth.AuthMessageStruct"
+                        }
+                    }
+                }
+            }
+        },
+        "/signup": {
+            "post": {
+                "description": "Creates a new user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Sign up",
+                "parameters": [
+                    {
+                        "description": "Credentials",
+                        "name": "credentials",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.Credentials"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth.SignUpOKResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "User already exists",
+                        "schema": {
+                            "$ref": "#/definitions/auth.AuthMessageStruct"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "auth.AuthMessageStruct": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "1620000000"
+                },
+                "error_code": {
+                    "type": "integer",
+                    "example": 400
+                },
+                "error_message": {
+                    "type": "string",
+                    "example": "User already exists"
+                }
+            }
+        },
+        "auth.Credentials": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "example@togo.dev"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "my_super_secret_password"
+                }
+            }
+        },
+        "auth.SignInOKResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.SignUpOKResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string",
+                    "example": "uuidv4"
+                }
+            }
+        }
+    }
+}

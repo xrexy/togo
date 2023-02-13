@@ -1,0 +1,103 @@
+basePath: /
+definitions:
+  auth.AuthMessageStruct:
+    properties:
+      created_at:
+        example: "1620000000"
+        type: string
+      error_code:
+        example: 400
+        type: integer
+      error_message:
+        example: User already exists
+        type: string
+    type: object
+  auth.Credentials:
+    properties:
+      email:
+        example: example@togo.dev
+        type: string
+      password:
+        example: my_super_secret_password
+        type: string
+    type: object
+  auth.SignInOKResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  auth.SignUpOKResponse:
+    properties:
+      token:
+        example: uuidv4
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: To-Go is a simple API for managing tasks. It is built with Fiber and
+    GORM.
+  title: To-Go API
+  version: 0.1-alpha
+paths:
+  /signin:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns a JWT token
+      parameters:
+      - description: Credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/auth.Credentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.SignInOKResponse'
+        "400":
+          description: Invalid credentials format
+          schema:
+            $ref: '#/definitions/auth.AuthMessageStruct'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/auth.AuthMessageStruct'
+        "500":
+          description: Internal server error while signing token
+          schema:
+            $ref: '#/definitions/auth.AuthMessageStruct'
+      summary: Sign in
+      tags:
+      - auth
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user
+      parameters:
+      - description: Credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/auth.Credentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.SignUpOKResponse'
+        "400":
+          description: User already exists
+          schema:
+            $ref: '#/definitions/auth.AuthMessageStruct'
+      summary: Sign up
+      tags:
+      - auth
+swagger: "2.0"
