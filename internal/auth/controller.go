@@ -24,18 +24,11 @@ type User struct {
 }
 
 type AuthController struct {
-	jwt   []byte
-	users map[string]string
-}
-
-var users = map[string]string{
-	"user1@gmail.com": "userpass",
-	"user2@gmail.com": "userpass",
+	jwt []byte
 }
 
 func NewAuthController(config config.EnvVars) *AuthController {
 	return &AuthController{
-		jwt:   []byte(config.JWT_KEY),
-		users: users,
+		jwt: []byte(config.JWT_KEY),
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	uuid "github.com/satori/go.uuid"
 	"github.com/xrexy/togo/pkg/database"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type SignUpOKResponse struct {
@@ -33,10 +34,19 @@ func (a *AuthController) Signup(c *fiber.Ctx) error {
 		})
 	}
 
+	hPass, err := hashPassword(creds.Password)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(AuthMessageStruct{
+			ErrorCode:    fiber.StatusInternalServerError,
+			ErrorMessage: "We couldn't create your account. Please try again later.",
+			CreatedAt:    time.Now(),
+		})
+	}
+
 	user := User{
 		UUID:     uuid.NewV4().String(),
 		Email:    creds.Email,
-		Password: creds.Password,
+		Password: hPass,
 	}
 
 	result := database.PostgesClient.Create(&user)
@@ -51,4 +61,9 @@ func (a *AuthController) Signup(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(SignUpOKResponse{
 		Token: user.UUID,
 	})
+}
+
+func hashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
 }
