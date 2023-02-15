@@ -12,7 +12,7 @@ import (
 
 	"github.com/xrexy/togo/config"
 	_ "github.com/xrexy/togo/docs"
-	"github.com/xrexy/togo/internal/auth"
+	router "github.com/xrexy/togo/internal"
 	"github.com/xrexy/togo/pkg/database"
 	"github.com/xrexy/togo/pkg/shutdown"
 )
@@ -113,9 +113,8 @@ func buildServer(env config.EnvVars) *fiber.App {
 		})
 	})
 
-	// create auth domain
-	authController := auth.NewAuthController(env)
-	auth.CreateAuthGroup(v1, authController, env)
+	// register routes
+	router.RegisterRoutes(v1, env)
 
 	return app
 }

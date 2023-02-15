@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"log"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -25,36 +24,35 @@ type SignInOKResponse struct {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param credentials body Credentials true "Credentials"
+// @Param credentials body database.UserCredentials true "Credentials"
 // @Success 200 {object} SignInOKResponse
-// @Failure 400 {object} AuthMessageStruct "Invalid credentials format"
-// @Failure 401 {object} AuthMessageStruct "Unauthorized"
-// @Failure 500 {object} AuthMessageStruct "Internal server error while signing token"
-// @Router /signin [post]
+// @Failure 400 {object} database.MessageStruct "Invalid credentials format"
+// @Failure 401 {object} database.MessageStruct "Unauthorized"
+// @Failure 500 {object} database.MessageStruct "Internal server error while signing token"
+// @Router /api/v1/auth/signin [post]
 func (ac *AuthController) Signin(ctx *fiber.Ctx) error {
-	var creds Credentials
+	var creds database.UserCredentials
 	if err := ctx.BodyParser(&creds); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(AuthMessageStruct{
+		return ctx.Status(fiber.StatusBadRequest).JSON(database.MessageStruct{
 			ErrorCode:    fiber.StatusBadRequest,
 			ErrorMessage: "Invalid credentials format",
 			CreatedAt:    time.Now(),
 		})
 	}
 
-	user := User{}
+	user := database.User{}
 	database.PostgesClient.Find(&user, "email = ?", creds.Email)
 	if user.Email == "" {
-		return ctx.Status(fiber.StatusUnauthorized).JSON(AuthMessageStruct{
+		return ctx.Status(fiber.StatusUnauthorized).JSON(database.MessageStruct{
 			ErrorCode:    fiber.StatusUnauthorized,
 			ErrorMessage: "Unauthorized",
 			CreatedAt:    time.Now(),
 		})
 	}
 
-	log.Default().Print(user.Password, creds.Password)
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(creds.Password))
 	if err != nil {
-		return ctx.Status(fiber.StatusUnauthorized).JSON(AuthMessageStruct{
+		return ctx.Status(fiber.StatusUnauthorized).JSON(database.MessageStruct{
 			ErrorCode:    fiber.StatusUnauthorized,
 			ErrorMessage: "Unauthorized",
 			CreatedAt:    time.Now(),
@@ -72,7 +70,7 @@ func (ac *AuthController) Signin(ctx *fiber.Ctx) error {
 
 	tokenString, err := token.SignedString(ac.jwt)
 	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(AuthMessageStruct{
+		return ctx.Status(fiber.StatusInternalServerError).JSON(database.MessageStruct{
 			ErrorCode:    fiber.StatusInternalServerError,
 			ErrorMessage: "Internal server error while signing token",
 			CreatedAt:    time.Now(),

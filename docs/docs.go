@@ -16,7 +16,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/signin": {
+        "/api/v1/auth/signin": {
             "post": {
                 "description": "Authenticates a user and returns a JWT token",
                 "consumes": [
@@ -36,7 +36,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth.Credentials"
+                            "$ref": "#/definitions/database.UserCredentials"
                         }
                     }
                 ],
@@ -50,25 +50,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid credentials format",
                         "schema": {
-                            "$ref": "#/definitions/auth.AuthMessageStruct"
+                            "$ref": "#/definitions/database.MessageStruct"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/auth.AuthMessageStruct"
+                            "$ref": "#/definitions/database.MessageStruct"
                         }
                     },
                     "500": {
                         "description": "Internal server error while signing token",
                         "schema": {
-                            "$ref": "#/definitions/auth.AuthMessageStruct"
+                            "$ref": "#/definitions/database.MessageStruct"
                         }
                     }
                 }
             }
         },
-        "/signup": {
+        "/api/v1/auth/signup": {
             "post": {
                 "description": "Creates a new user",
                 "consumes": [
@@ -88,7 +88,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth.Credentials"
+                            "$ref": "#/definitions/database.UserCredentials"
                         }
                     }
                 ],
@@ -102,7 +102,124 @@ const docTemplate = `{
                     "400": {
                         "description": "User already exists",
                         "schema": {
-                            "$ref": "#/definitions/auth.AuthMessageStruct"
+                            "$ref": "#/definitions/database.MessageStruct"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/task": {
+            "get": {
+                "description": "Returns all tasks",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Get all tasks",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/database.Task"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error while getting tasks",
+                        "schema": {
+                            "$ref": "#/definitions/database.MessageStruct"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a task with title and content",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Create a task",
+                "parameters": [
+                    {
+                        "description": "Task title",
+                        "name": "title",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Task content",
+                        "name": "content",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/database.Task"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error while creating task",
+                        "schema": {
+                            "$ref": "#/definitions/database.MessageStruct"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/task/{uuid}": {
+            "get": {
+                "description": "Returns a task by uuid",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Get a task",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Task UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/database.Task"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error while getting task",
+                        "schema": {
+                            "$ref": "#/definitions/database.MessageStruct"
                         }
                     }
                 }
@@ -110,7 +227,24 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "auth.AuthMessageStruct": {
+        "auth.SignInOKResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.SignUpOKResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string",
+                    "example": "uuidv4"
+                }
+            }
+        },
+        "database.MessageStruct": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -127,7 +261,37 @@ const docTemplate = `{
                 }
             }
         },
-        "auth.Credentials": {
+        "database.Task": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "example": "This is my first task"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "1620000000"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "My first task"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "1620000000"
+                },
+                "user_uuid": {
+                    "description": "Foreign key",
+                    "type": "string",
+                    "example": "uuidv4"
+                },
+                "uuid": {
+                    "type": "string",
+                    "example": "uuidv4"
+                }
+            }
+        },
+        "database.UserCredentials": {
             "type": "object",
             "properties": {
                 "email": {
@@ -137,23 +301,6 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "example": "my_super_secret_password"
-                }
-            }
-        },
-        "auth.SignInOKResponse": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string"
-                }
-            }
-        },
-        "auth.SignUpOKResponse": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string",
-                    "example": "uuidv4"
                 }
             }
         }

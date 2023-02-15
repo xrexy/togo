@@ -19,15 +19,15 @@ type SignUpOKResponse struct {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param credentials body Credentials true "Credentials"
+// @Param credentials body database.UserCredentials true "Credentials"
 // @Success 200 {object} SignUpOKResponse
-// @Failure 400 {object} AuthMessageStruct "Invalid credentials format"
-// @Failure 400 {object} AuthMessageStruct "User already exists"
-// @Router /signup [post]
+// @Failure 400 {object} database.MessageStruct "Invalid credentials format"
+// @Failure 400 {object} database.MessageStruct "User already exists"
+// @Router /api/v1/auth/signup [post]
 func (a *AuthController) Signup(c *fiber.Ctx) error {
-	var creds Credentials
+	var creds database.UserCredentials
 	if err := c.BodyParser(&creds); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(AuthMessageStruct{
+		return c.Status(fiber.StatusBadRequest).JSON(database.MessageStruct{
 			ErrorCode:    fiber.StatusBadRequest,
 			ErrorMessage: "Invalid credentials format",
 			CreatedAt:    time.Now(),
@@ -36,22 +36,25 @@ func (a *AuthController) Signup(c *fiber.Ctx) error {
 
 	hPass, err := hashPassword(creds.Password)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(AuthMessageStruct{
+		return c.Status(fiber.StatusInternalServerError).JSON(database.MessageStruct{
 			ErrorCode:    fiber.StatusInternalServerError,
 			ErrorMessage: "We couldn't create your account. Please try again later.",
 			CreatedAt:    time.Now(),
 		})
 	}
 
-	user := User{
-		UUID:     uuid.NewV4().String(),
-		Email:    creds.Email,
-		Password: hPass,
+	user := database.User{
+		UUID:      uuid.NewV4().String(),
+		Email:     creds.Email,
+		Password:  hPass,
+		Tasks:     []database.Task{},
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	result := database.PostgesClient.Create(&user)
 	if result.Error != nil {
-		return c.Status(fiber.StatusConflict).JSON(AuthMessageStruct{
+		return c.Status(fiber.StatusConflict).JSON(database.MessageStruct{
 			ErrorCode:    fiber.StatusConflict,
 			ErrorMessage: "User already exists",
 			CreatedAt:    time.Now(),
