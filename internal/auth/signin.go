@@ -59,11 +59,14 @@ func (ac *AuthController) Signin(ctx *fiber.Ctx) error {
 		})
 	}
 
-	expTime := time.Now().Add(time.Hour * 24)
+	expTime := time.Now().Add(time.Hour * 24) // 24 hours
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		Email: creds.Email,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    "localhost",
+			Issuer:    "togo-authority",
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			ID:        user.UUID,
+			Subject:   user.Email,
 			ExpiresAt: jwt.NewNumericDate(expTime),
 		},
 	})

@@ -22,7 +22,7 @@ func (c *TaskController) CreateGroup(base fiber.Router, config config.EnvVars) {
 	tasks.Post("/", c.CreateTask)
 
 	// -- PUT
-	// tasks.Put("/:uuid", c.UpdateTask)
+	tasks.Put("/:uuid", c.UpdateTask)
 
 	// -- DELETE
 	// tasks.Delete("/:uuid", c.DeleteTask)

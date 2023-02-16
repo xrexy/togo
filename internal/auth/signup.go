@@ -48,8 +48,8 @@ func (a *AuthController) Signup(c *fiber.Ctx) error {
 		Email:     creds.Email,
 		Password:  hPass,
 		Tasks:     []database.Task{},
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		CreatedAt: time.Now().Unix(),
+		UpdatedAt: time.Now().Unix(),
 	}
 
 	result := database.PostgesClient.Create(&user)

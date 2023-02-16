@@ -9,7 +9,7 @@ import (
 
 // GetTasks
 // @Summary Get all tasks
-// @Description Returns all tasks
+// @Description Returns all tasks. UNFINISHED (No auth atm so can't get the uuid of user) - will return only tasks of user in the future
 // @Tags tasks
 // @Accept json
 // @Produce json
@@ -17,6 +17,8 @@ import (
 // @Failure 500 {object} database.MessageStruct "Internal server error while getting tasks"
 // @Router /api/v1/task [get]
 func (c *TaskController) GetTasks(ctx *fiber.Ctx) error {
+	ctx.Accepts("application/json")
+
 	tasks := []database.Task{}
 	tx := database.PostgesClient.Find(&tasks)
 	if tx.Error != nil {
