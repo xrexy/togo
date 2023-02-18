@@ -16,9 +16,8 @@ func (c *TaskController) UpdateTask(ctx *fiber.Ctx) error {
 	var request UpdateTaskRequest
 	if err := ctx.BodyParser(&request); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(database.MessageStruct{
-			ErrorCode:    fiber.StatusBadRequest,
 			ErrorMessage: "Invalid body format",
-			CreatedAt:    time.Now(),
+			CreatedAt:    time.Now().Unix(),
 		})
 	}
 

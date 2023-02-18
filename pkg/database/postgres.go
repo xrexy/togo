@@ -24,6 +24,14 @@ func StartPostgresDB(env *config.EnvVars) error {
 
 	log.Default().Println("Postgres DB started")
 
+	log.Default().Println("Migrating Postgres DB")
+	err = PostgesClient.AutoMigrate(&User{}, &Task{})
+	if err != nil {
+		return err
+	}
+
+	log.Default().Println("Postgres DB migrated")
+
 	return nil
 }
 

@@ -36,9 +36,8 @@ func (c *TaskController) GetTask(ctx *fiber.Ctx) error {
 	tx := database.PostgesClient.Where("uuid = ?", request.UUID).First(&task)
 	if tx.Error != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(database.MessageStruct{
-			ErrorCode:    fiber.StatusInternalServerError,
 			ErrorMessage: "Internal server error while getting task",
-			CreatedAt:    time.Now(),
+			CreatedAt:    time.Now().Unix(),
 		})
 	}
 

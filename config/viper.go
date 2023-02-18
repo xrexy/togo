@@ -3,9 +3,12 @@ package config
 import "github.com/spf13/viper"
 
 type EnvVars struct {
-	PORT    string `mapstructure:"PORT"`
-	JWT_KEY string `mapstructure:"JWT_KEY"`
-	DB_DSN  string `mapstructure:"DB_DSN"`
+	PORT   string `mapstructure:"PORT"`
+	DB_DSN string `mapstructure:"DB_DSN"`
+
+	JWT_SECRET     string `mapstructure:"JWT_SECRET"`
+	JWT_ISSUER     string `mapstructure:"JWT_ISSUER"`
+	JWT_COOKIE_KEY string `mapstructure:"JWT_COOKIE_KEY"`
 }
 
 func LoadConfig() (config EnvVars, err error) {

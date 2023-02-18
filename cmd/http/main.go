@@ -59,8 +59,8 @@ func run(env config.EnvVars) (func(), error) {
 }
 
 type HealthResponse struct {
-	Status    string `json:"status"`
-	Timestamp int64  `json:"timestamp"`
+	Status string `json:"status"`
+	Unix   int64  `json:"unix"`
 }
 
 func buildServer(env config.EnvVars) *fiber.App {
@@ -108,8 +108,8 @@ func buildServer(env config.EnvVars) *fiber.App {
 	// @Router /health [get]
 	v1.Get("/health", func(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusOK).JSON(HealthResponse{
-			Status:    "OK",
-			Timestamp: time.Now().Unix(),
+			Status: "Barely holding on",
+			Unix:   time.Now().Unix(),
 		})
 	})
 

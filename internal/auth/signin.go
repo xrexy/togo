@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/xrexy/togo/pkg/authentication"
 	"github.com/xrexy/togo/pkg/database"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -34,9 +35,8 @@ func (ac *AuthController) Signin(ctx *fiber.Ctx) error {
 	var creds database.UserCredentials
 	if err := ctx.BodyParser(&creds); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(database.MessageStruct{
-			ErrorCode:    fiber.StatusBadRequest,
 			ErrorMessage: "Invalid credentials format",
-			CreatedAt:    time.Now(),
+			CreatedAt:    time.Now().Unix(),
 		})
 	}
 
@@ -44,49 +44,35 @@ func (ac *AuthController) Signin(ctx *fiber.Ctx) error {
 	database.PostgesClient.Find(&user, "email = ?", creds.Email)
 	if user.Email == "" {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(database.MessageStruct{
-			ErrorCode:    fiber.StatusUnauthorized,
 			ErrorMessage: "Unauthorized",
-			CreatedAt:    time.Now(),
+			CreatedAt:    time.Now().Unix(),
 		})
 	}
 
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(creds.Password))
 	if err != nil {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(database.MessageStruct{
-			ErrorCode:    fiber.StatusUnauthorized,
 			ErrorMessage: "Unauthorized",
-			CreatedAt:    time.Now(),
+			CreatedAt:    time.Now().Unix(),
 		})
 	}
 
-	expTime := time.Now().Add(time.Hour * 24) // 24 hours
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
-		Email: creds.Email,
-		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    "togo-authority",
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ID:        user.UUID,
-			Subject:   user.Email,
-			ExpiresAt: jwt.NewNumericDate(expTime),
-		},
-	})
-
-	tokenString, err := token.SignedString(ac.jwt)
+	token, exp, err := authentication.New().CreateJWT(user)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(database.MessageStruct{
-			ErrorCode:    fiber.StatusInternalServerError,
 			ErrorMessage: "Internal server error while signing token",
-			CreatedAt:    time.Now(),
+			CreatedAt:    time.Now().Unix(),
 		})
 	}
 
 	ctx.Cookie(&fiber.Cookie{
-		Name:    "token",
-		Value:   tokenString,
-		Expires: expTime,
+		Name:    ac.config.JWT_COOKIE_KEY,
+		Value:   token,
+		Expires: exp,
 	})
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"token": tokenString,
+		"token": token,
+		"exp":   exp.Unix(),
 	})
 }

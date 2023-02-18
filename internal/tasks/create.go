@@ -34,9 +34,8 @@ func (c *TaskController) CreateTask(ctx *fiber.Ctx) error {
 	var request CreateTaskRequest
 	if err := ctx.BodyParser(&request); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(database.MessageStruct{
-			ErrorCode:    fiber.StatusBadRequest,
 			ErrorMessage: "Invalid body format",
-			CreatedAt:    time.Now(),
+			CreatedAt:    time.Now().Unix(),
 		})
 	}
 
@@ -51,7 +50,7 @@ func (c *TaskController) CreateTask(ctx *fiber.Ctx) error {
 		UUID:      uuid.NewV4().String(),
 		Title:     request.Title,
 		Content:   request.Content,
-		Creator:   request.Creator,
+		UserID:    request.Creator,
 		CreatedAt: time.Now().Unix(),
 		UpdatedAt: time.Now().Unix(),
 	}
@@ -59,9 +58,8 @@ func (c *TaskController) CreateTask(ctx *fiber.Ctx) error {
 	tx := database.PostgesClient.Create(&task)
 	if tx.Error != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(database.MessageStruct{
-			ErrorCode:    fiber.StatusInternalServerError,
 			ErrorMessage: "Error while creating task",
-			CreatedAt:    time.Now(),
+			CreatedAt:    time.Now().Unix(),
 		})
 	}
 
