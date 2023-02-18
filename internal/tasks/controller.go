@@ -24,7 +24,7 @@ func (c *TaskController) CreateGroup(base fiber.Router, config config.EnvVars) {
 	tasks.Post("/", middleware.DeserializeUser, c.CreateTask)
 
 	// -- PUT
-	tasks.Put("/u/:uuid", c.UpdateTask)
+	tasks.Put("/u/:uuid", middleware.DeserializeUser, c.UpdateTask)
 
 	// -- DELETE
 	// tasks.Delete("/:uuid", c.DeleteTask)
