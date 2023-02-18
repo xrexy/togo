@@ -38,16 +38,16 @@ func (c *TaskController) GetTask(ctx *fiber.Ctx) error {
 	token := auth.GetTokenString(ctx)
 	if token == "" {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(database.MessageStruct{
-			ErrorMessage: "Unauthorized",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Unauthorized",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
 	claims, err := auth.VerifyJWT(token)
 	if err != nil {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(database.MessageStruct{
-			ErrorMessage: "Unauthorized",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Unauthorized",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
@@ -57,8 +57,8 @@ func (c *TaskController) GetTask(ctx *fiber.Ctx) error {
 	tx := database.PostgesClient.Where("uuid = ?", request.UUID).First(&task)
 	if tx.Error != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(database.MessageStruct{
-			ErrorMessage: "Internal server error while getting task",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Internal server error while getting task",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
@@ -68,16 +68,16 @@ func (c *TaskController) GetTask(ctx *fiber.Ctx) error {
 		tx := database.PostgesClient.Where("uuid = ?", uuid).First(&user)
 		if tx.Error != nil || user.UUID == "" {
 			return ctx.Status(fiber.StatusInternalServerError).JSON(database.MessageStruct{
-				ErrorMessage: "Error while getting user tasks",
-				CreatedAt:    time.Now().Unix(),
+				Message:   "Error while getting user tasks",
+				CreatedAt: time.Now().Unix(),
 			})
 		}
 
 		// If the user is not an admin, return unauthorized. If the user is an admin, continue
 		if user.Role != database.RoleAdmin {
 			return ctx.Status(fiber.StatusUnauthorized).JSON(database.MessageStruct{
-				ErrorMessage: "You don't have access to this resource",
-				CreatedAt:    time.Now().Unix(),
+				Message:   "You don't have access to this resource",
+				CreatedAt: time.Now().Unix(),
 			})
 		}
 	}

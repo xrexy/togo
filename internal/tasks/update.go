@@ -20,15 +20,15 @@ func (c *TaskController) UpdateTask(ctx *fiber.Ctx) error {
 	var request UpdateTaskRequest
 	if err := ctx.BodyParser(&request); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(database.MessageStruct{
-			ErrorMessage: "Invalid body format",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Invalid body format",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
 	if request.Title == "" && request.Content == "" && request.Creator == "" {
 		return ctx.Status(fiber.StatusBadRequest).JSON(database.MessageStruct{
-			ErrorMessage: "At least one of the fields must be set",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "At least one of the fields must be set",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
@@ -43,22 +43,22 @@ func (c *TaskController) UpdateTask(ctx *fiber.Ctx) error {
 	tx := database.PostgesClient.Where("uuid = ?", taskUUID).First(&task)
 	if tx.Error != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(database.MessageStruct{
-			ErrorMessage: "Internal server error while getting task",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Internal server error while getting task",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
 	if task.UUID == "" {
 		return ctx.Status(fiber.StatusNotFound).JSON(database.MessageStruct{
-			ErrorMessage: "Task not found",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Task not found",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
 	if user.Role != database.RoleAdmin && task.UserID != user.UUID {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(database.MessageStruct{
-			ErrorMessage: "You are not authorized to update this resource",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "You are not authorized to update this resource",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
@@ -76,14 +76,14 @@ func (c *TaskController) UpdateTask(ctx *fiber.Ctx) error {
 		if tx.Error != nil {
 			if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 				return ctx.Status(fiber.StatusNotFound).JSON(database.MessageStruct{
-					ErrorMessage: "User not found",
-					CreatedAt:    time.Now().Unix(),
+					Message:   "User not found",
+					CreatedAt: time.Now().Unix(),
 				})
 			}
 
 			return ctx.Status(fiber.StatusInternalServerError).JSON(database.MessageStruct{
-				ErrorMessage: "Internal server error while getting user to assign task to",
-				CreatedAt:    time.Now().Unix(),
+				Message:   "Internal server error while getting user to assign task to",
+				CreatedAt: time.Now().Unix(),
 			})
 		}
 
@@ -95,8 +95,8 @@ func (c *TaskController) UpdateTask(ctx *fiber.Ctx) error {
 	tx = database.PostgesClient.Save(&task)
 	if tx.Error != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(database.MessageStruct{
-			ErrorMessage: "Internal server error while updating task",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Internal server error while updating task",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 

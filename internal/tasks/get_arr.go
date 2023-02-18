@@ -26,16 +26,16 @@ func (c *TaskController) GetTasks(ctx *fiber.Ctx) error {
 	token := auth.GetTokenString(ctx)
 	if token == "" {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(database.MessageStruct{
-			ErrorMessage: "Unauthorized",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Unauthorized",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
 	claims, err := auth.VerifyJWT(token)
 	if err != nil {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(database.MessageStruct{
-			ErrorMessage: "Unauthorized",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Unauthorized",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
@@ -45,8 +45,8 @@ func (c *TaskController) GetTasks(ctx *fiber.Ctx) error {
 	tx := database.PostgesClient.Where("uuid = ?", uuid).First(&user)
 	if tx.Error != nil || user.UUID == "" {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(database.MessageStruct{
-			ErrorMessage: "Error while getting user tasks",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Error while getting user tasks",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
@@ -62,8 +62,8 @@ func (c *TaskController) GetTasks(ctx *fiber.Ctx) error {
 
 	if tx.Error != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(database.MessageStruct{
-			ErrorMessage: "Error while getting user tasks",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Error while getting user tasks",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 

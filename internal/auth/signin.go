@@ -35,8 +35,8 @@ func (ac *AuthController) Signin(ctx *fiber.Ctx) error {
 	var creds database.UserCredentials
 	if err := ctx.BodyParser(&creds); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(database.MessageStruct{
-			ErrorMessage: "Invalid credentials format",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Invalid credentials format",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
@@ -44,24 +44,24 @@ func (ac *AuthController) Signin(ctx *fiber.Ctx) error {
 	database.PostgesClient.Find(&user, "email = ?", creds.Email)
 	if user.Email == "" {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(database.MessageStruct{
-			ErrorMessage: "Unauthorized",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Unauthorized",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(creds.Password))
 	if err != nil {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(database.MessageStruct{
-			ErrorMessage: "Unauthorized",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Unauthorized",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
 	token, exp, err := authentication.New().CreateJWT(user)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(database.MessageStruct{
-			ErrorMessage: "Internal server error while signing token",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Internal server error while signing token",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 

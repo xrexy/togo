@@ -23,8 +23,7 @@ type User struct {
 	Role      Role   `json:"role" example:"user" gorm:"not null"`
 	Plan      Plan   `json:"plan" example:"free" gorm:"not null"`
 
-	TaskCount int    `json:"task_count" gorm:"not null,default:0"` // Virtual field
-	Tasks     []Task `json:"tasks" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+	Tasks []Task `json:"tasks" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }
 
 type Role string

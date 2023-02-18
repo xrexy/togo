@@ -34,16 +34,16 @@ func (c *TaskController) CreateTask(ctx *fiber.Ctx) error {
 	var request CreateTaskRequest
 	if err := ctx.BodyParser(&request); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(database.MessageStruct{
-			ErrorMessage: "Invalid body format",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Invalid body format",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
 	user := ctx.Locals("user").(*database.User)
-	if user.Role != database.RoleAdmin && user.TaskCount >= database.PlanMaxTasks[user.Plan] {
+	if user.Role != database.RoleAdmin && len(user.Tasks) >= database.PlanMaxTasks[user.Plan] {
 		return ctx.Status(fiber.StatusForbidden).JSON(database.MessageStruct{
-			ErrorMessage: fmt.Sprintf("You have reached the maximum number of tasks for your plan (%d)", database.PlanMaxTasks[user.Plan]),
-			CreatedAt:    time.Now().Unix(),
+			Message:   fmt.Sprintf("You have reached the maximum number of tasks for your plan (%d)", database.PlanMaxTasks[user.Plan]),
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
@@ -70,32 +70,24 @@ func (c *TaskController) CreateTask(ctx *fiber.Ctx) error {
 
 	if err := tx.Error; err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(database.MessageStruct{
-			ErrorMessage: "Something went wrong while creating transaction",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Something went wrong while creating transaction",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
 	if err := tx.Create(&task).Error; err != nil {
 		tx.Rollback()
 		return ctx.Status(fiber.StatusNotModified).JSON(database.MessageStruct{
-			ErrorMessage: "[Transaction] Couldn't create task",
-			CreatedAt:    time.Now().Unix(),
-		})
-	}
-
-	if err := tx.Model(&user).Update("task_count", user.TaskCount+1).Error; err != nil {
-		tx.Rollback()
-		return ctx.Status(fiber.StatusNotModified).JSON(database.MessageStruct{
-			ErrorMessage: "[Transaction] Couldn't update user task count",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "[Transaction] Couldn't create task",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
 		return ctx.Status(fiber.StatusInternalServerError).JSON(database.MessageStruct{
-			ErrorMessage: "Something went wrong while committing transaction",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Something went wrong while committing transaction",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 

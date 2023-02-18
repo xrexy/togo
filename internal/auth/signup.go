@@ -29,16 +29,16 @@ func (ac *AuthController) Signup(ctx *fiber.Ctx) error {
 	var creds database.UserCredentials
 	if err := ctx.BodyParser(&creds); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(database.MessageStruct{
-			ErrorMessage: "Invalid credentials format",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Invalid credentials format",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
 	hPass, err := hashPassword(creds.Password)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(database.MessageStruct{
-			ErrorMessage: "We couldn't create your account. Please try again later.",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "We couldn't create your account. Please try again later.",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
@@ -50,23 +50,22 @@ func (ac *AuthController) Signup(ctx *fiber.Ctx) error {
 		UpdatedAt: time.Now().Unix(),
 		Role:      database.RoleUser,
 		Plan:      database.PlanFree,
-		TaskCount: 0,
 		Tasks:     make([]database.Task, 0),
 	}
 
 	result := database.PostgesClient.Create(&user)
 	if result.Error != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(database.MessageStruct{
-			ErrorMessage: "User already exists",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "User already exists",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 
 	token, exp, err := authentication.New().CreateJWT(user)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(database.MessageStruct{
-			ErrorMessage: "Internal server error while signing token",
-			CreatedAt:    time.Now().Unix(),
+			Message:   "Internal server error while signing token",
+			CreatedAt: time.Now().Unix(),
 		})
 	}
 

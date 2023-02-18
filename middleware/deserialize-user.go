@@ -24,8 +24,8 @@ func DeserializeUser(c *fiber.Ctx) error {
 
 	if tokenString == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(database.MessageStruct{
-			ErrorMessage: "Not logged in",
-			CreatedAt:    createdAt,
+			Message:   "Not logged in",
+			CreatedAt: createdAt,
 		})
 	}
 
@@ -33,14 +33,14 @@ func DeserializeUser(c *fiber.Ctx) error {
 	if err != nil {
 		if strings.Contains(err.Error(), "token is expired") {
 			return c.Status(fiber.StatusUnauthorized).JSON(database.MessageStruct{
-				ErrorMessage: "Token is expired",
-				CreatedAt:    createdAt,
+				Message:   "Token is expired",
+				CreatedAt: createdAt,
 			})
 		}
 
 		return c.Status(fiber.StatusUnauthorized).JSON(database.MessageStruct{
-			ErrorMessage: "Invalid Token",
-			CreatedAt:    createdAt,
+			Message:   "Invalid Token",
+			CreatedAt: createdAt,
 		})
 	}
 
@@ -51,8 +51,8 @@ func DeserializeUser(c *fiber.Ctx) error {
 
 	if user.UUID != claims["sub"] {
 		return c.Status(fiber.StatusForbidden).JSON(database.MessageStruct{
-			ErrorMessage: "The user belonging to this token no logger exists",
-			CreatedAt:    createdAt,
+			Message:   "The user belonging to this token no logger exists",
+			CreatedAt: createdAt,
 		})
 	}
 
