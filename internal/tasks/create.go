@@ -1,6 +1,7 @@
 package tasks
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -12,7 +13,6 @@ import (
 type CreateTaskRequest struct {
 	Title   string `json:"title" validate:"required,min=3,max=64"`
 	Content string `json:"content" validate:"required,min=3,max=1024"`
-	Creator string `json:"creator" validate:"required,uuid4"`
 }
 
 // CreateTask
@@ -39,26 +39,62 @@ func (c *TaskController) CreateTask(ctx *fiber.Ctx) error {
 		})
 	}
 
+	user := ctx.Locals("user").(*database.User)
+	if user.TaskCount >= database.PlanMaxTasks[user.Plan] {
+		return ctx.Status(fiber.StatusForbidden).JSON(database.MessageStruct{
+			ErrorMessage: fmt.Sprintf("You have reached the maximum number of tasks for your plan (%d)", database.PlanMaxTasks[user.Plan]),
+			CreatedAt:    time.Now().Unix(),
+		})
+	}
+
 	response, _ := validation.ValidateStruct(request)
 	if len(response) > 0 {
 		return ctx.Status(fiber.StatusBadRequest).JSON(response)
 	}
 
-	// TODO add authentication or auth layer/middleware
-
 	task := database.Task{
 		UUID:      uuid.NewV4().String(),
 		Title:     request.Title,
 		Content:   request.Content,
-		UserID:    request.Creator,
+		UserID:    user.UUID,
 		CreatedAt: time.Now().Unix(),
 		UpdatedAt: time.Now().Unix(),
 	}
 
-	tx := database.PostgesClient.Create(&task)
-	if tx.Error != nil {
+	tx := database.PostgesClient.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(database.MessageStruct{
-			ErrorMessage: "Error while creating task",
+			ErrorMessage: "Something went wrong while creating transaction",
+			CreatedAt:    time.Now().Unix(),
+		})
+	}
+
+	if err := tx.Create(&task).Error; err != nil {
+		tx.Rollback()
+		return ctx.Status(fiber.StatusNotModified).JSON(database.MessageStruct{
+			ErrorMessage: "[Transaction] Couldn't create task",
+			CreatedAt:    time.Now().Unix(),
+		})
+	}
+
+	if err := tx.Model(&user).Update("task_count", user.TaskCount+1).Error; err != nil {
+		tx.Rollback()
+		return ctx.Status(fiber.StatusNotModified).JSON(database.MessageStruct{
+			ErrorMessage: "[Transaction] Couldn't update user task count",
+			CreatedAt:    time.Now().Unix(),
+		})
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return ctx.Status(fiber.StatusInternalServerError).JSON(database.MessageStruct{
+			ErrorMessage: "Something went wrong while committing transaction",
 			CreatedAt:    time.Now().Unix(),
 		})
 	}

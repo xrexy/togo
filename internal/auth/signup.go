@@ -48,8 +48,9 @@ func (ac *AuthController) Signup(ctx *fiber.Ctx) error {
 		Password:  hPass,
 		CreatedAt: time.Now().Unix(),
 		UpdatedAt: time.Now().Unix(),
-		Role:      string(database.RoleUser),
-		Plan:      string(database.PlanFree),
+		Role:      database.RoleUser,
+		Plan:      database.PlanFree,
+		TaskCount: 0,
 		Tasks:     make([]database.Task, 0),
 	}
 

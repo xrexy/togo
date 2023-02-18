@@ -16,6 +16,7 @@ import (
 // @Accept json
 // @Produce json
 // @Success 200 {array} database.Task
+// @Failure 401 {object} database.MessageStruct "Unauthorized"
 // @Failure 500 {object} database.MessageStruct "Internal server error while getting tasks"
 // @Router /api/v1/task [get]
 func (c *TaskController) GetTasks(ctx *fiber.Ctx) error {
@@ -55,7 +56,7 @@ func (c *TaskController) GetTasks(ctx *fiber.Ctx) error {
 
 	// If user is admin, return all tasks
 	// Else return only tasks that the user has created
-	if user.Role == string(database.RoleAdmin) {
+	if user.Role == database.RoleAdmin {
 		tx = database.PostgesClient.Find(&tasks)
 	} else {
 		tx = database.PostgesClient.Where("user_id = ?", uuid).Find(&tasks)

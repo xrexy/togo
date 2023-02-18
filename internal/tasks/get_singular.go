@@ -22,7 +22,7 @@ type GetSingularTaskRequest struct {
 // @Success 200 {object} database.Task\
 // @Failure 400 {array} validation.ErrorResponse "Validation error"
 // @Failure 500 {object} database.MessageStruct "Internal server error while getting task"
-// @Router /api/v1/task/{uuid} [get]
+// @Router /api/v1/task/u/{uuid} [get]
 func (c *TaskController) GetTask(ctx *fiber.Ctx) error {
 	var request GetSingularTaskRequest
 	request.UUID = ctx.Params("uuid")
