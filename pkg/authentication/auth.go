@@ -92,8 +92,8 @@ func (a *Authentication) GetTokenString(c *fiber.Ctx) string {
 
 	if strings.HasPrefix(authorization, "Bearer ") {
 		tokenString = strings.TrimPrefix(authorization, "Bearer ")
-	} else if c.Cookies(a.config.JWT_SECRET) != "" {
-		tokenString = c.Cookies(a.config.JWT_SECRET)
+	} else if c.Cookies(a.config.JWT_COOKIE_KEY) != "" {
+		tokenString = c.Cookies(a.config.JWT_COOKIE_KEY)
 	}
 
 	return tokenString
