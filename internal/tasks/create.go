@@ -40,7 +40,7 @@ func (c *TaskController) CreateTask(ctx *fiber.Ctx) error {
 	}
 
 	user := ctx.Locals("user").(*database.User)
-	if user.TaskCount >= database.PlanMaxTasks[user.Plan] {
+	if user.Role != database.RoleAdmin && user.TaskCount >= database.PlanMaxTasks[user.Plan] {
 		return ctx.Status(fiber.StatusForbidden).JSON(database.MessageStruct{
 			ErrorMessage: fmt.Sprintf("You have reached the maximum number of tasks for your plan (%d)", database.PlanMaxTasks[user.Plan]),
 			CreatedAt:    time.Now().Unix(),
