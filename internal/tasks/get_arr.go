@@ -39,8 +39,6 @@ func (c *TaskController) GetTasks(ctx *fiber.Ctx) error {
 		})
 	}
 
-	fmt.Println(claims)
-
 	uuid := fmt.Sprint(claims["sub"])
 
 	var user database.User
