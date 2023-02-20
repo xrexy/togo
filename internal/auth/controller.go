@@ -1,34 +1,24 @@
 package auth
 
 import (
-	"time"
-
+	"github.com/gofiber/fiber/v2"
 	"github.com/xrexy/togo/config"
+	"github.com/xrexy/togo/middleware"
 )
 
-type AuthMessageStruct struct {
-	ErrorCode    int       `json:"error_code" example:"400"`
-	ErrorMessage string    `json:"error_message" example:"User already exists"`
-	CreatedAt    time.Time `json:"created_at" example:"1620000000"`
-}
-
-type Credentials struct {
-	Email    string `json:"email" example:"example@togo.dev"`
-	Password string `json:"password" example:"my_super_secret_password"`
-}
-
-type User struct {
-	UUID     string `json:"uuid" example:"uuidv4" gorm:"primaryKey"`
-	Email    string `json:"email" example:"example@togo.dev" gorm:"uniqueIndex"`
-	Password string `json:"password" example:"my_super_secret_password" gorm:"not null"`
-}
-
 type AuthController struct {
-	jwt []byte
+	config config.EnvVars
 }
 
 func NewAuthController(config config.EnvVars) *AuthController {
-	return &AuthController{
-		jwt: []byte(config.JWT_KEY),
-	}
+	return &AuthController{config: config}
+}
+
+func (c *AuthController) CreateGroup(base fiber.Router, config config.EnvVars) {
+	auth := base.Group("/auth")
+	auth.Post("/signin", c.Signin)
+	auth.Post("/signup", c.Signup)
+
+	auth.Get("/logout", c.Logout)
+	auth.Get("/me", middleware.DeserializeUser, c.Me)
 }

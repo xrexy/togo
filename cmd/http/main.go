@@ -12,7 +12,7 @@ import (
 
 	"github.com/xrexy/togo/config"
 	_ "github.com/xrexy/togo/docs"
-	"github.com/xrexy/togo/internal/auth"
+	router "github.com/xrexy/togo/internal"
 	"github.com/xrexy/togo/pkg/database"
 	"github.com/xrexy/togo/pkg/shutdown"
 )
@@ -59,8 +59,8 @@ func run(env config.EnvVars) (func(), error) {
 }
 
 type HealthResponse struct {
-	Status    string `json:"status"`
-	Timestamp int64  `json:"timestamp"`
+	Status string `json:"status"`
+	Unix   int64  `json:"unix"`
 }
 
 func buildServer(env config.EnvVars) *fiber.App {
@@ -108,14 +108,13 @@ func buildServer(env config.EnvVars) *fiber.App {
 	// @Router /health [get]
 	v1.Get("/health", func(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusOK).JSON(HealthResponse{
-			Status:    "OK",
-			Timestamp: time.Now().Unix(),
+			Status: "Barely holding on",
+			Unix:   time.Now().Unix(),
 		})
 	})
 
-	// create auth domain
-	authController := auth.NewAuthController(env)
-	auth.CreateAuthGroup(v1, authController, env)
+	// register routes
+	router.RegisterRoutes(v1, env)
 
 	return app
 }

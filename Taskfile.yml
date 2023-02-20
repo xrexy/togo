@@ -6,4 +6,10 @@ tasks:
       - air
   docs:
     cmds:
-      - swag i --d ./cmd/http,./internal/auth
+      - swag i --d ./cmd/http,./pkg/validation,./pkg/database,./internal
+  build:
+    cmds:
+      - go build -gcflags="all=-N -l" ./cmd/http/main.go
+  preview:
+    cmds:
+      - ./main.exe
