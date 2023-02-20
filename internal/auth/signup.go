@@ -7,6 +7,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/xrexy/togo/pkg/authentication"
 	"github.com/xrexy/togo/pkg/database"
+	"github.com/xrexy/togo/pkg/validation"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -32,6 +33,11 @@ func (ac *AuthController) Signup(ctx *fiber.Ctx) error {
 			Message:   "Invalid credentials format",
 			CreatedAt: time.Now().Unix(),
 		})
+	}
+
+	response, _ := validation.ValidateStruct(creds)
+	if len(response) > 0 {
+		return ctx.Status(fiber.StatusBadRequest).JSON(response)
 	}
 
 	hPass, err := hashPassword(creds.Password)

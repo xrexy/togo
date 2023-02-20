@@ -48,6 +48,6 @@ var PlanMaxTasks = map[Plan]int{
 
 // -- Misc
 type UserCredentials struct {
-	Email    string `json:"email" example:"example@togo.dev"`
-	Password string `json:"password" example:"my_super_secret_password"`
+	Email    string `json:"email" example:"example@togo.dev" validate:"required,email"`
+	Password string `json:"password" example:"my_super_secret_password" validate:"required,min=8,max=32"`
 }
