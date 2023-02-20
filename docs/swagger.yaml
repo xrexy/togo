@@ -13,15 +13,12 @@ definitions:
     type: object
   database.MessageStruct:
     properties:
-      created_at:
-        example: "1620000000"
-        type: string
-      error_code:
-        example: 400
-        type: integer
       error_message:
         example: User already exists
         type: string
+      unix:
+        example: 1620000000
+        type: integer
     type: object
   database.Task:
     properties:
@@ -29,15 +26,15 @@ definitions:
         example: This is my first task
         type: string
       created_at:
-        example: "1620000000"
-        type: string
+        example: 1676546709
+        type: integer
       title:
         example: My first task
         type: string
       updated_at:
-        example: "1620000000"
-        type: string
-      user_uuid:
+        example: 1676546709
+        type: integer
+      user_id:
         description: Foreign key
         example: uuidv4
         type: string
@@ -52,6 +49,20 @@ definitions:
         type: string
       password:
         example: my_super_secret_password
+        type: string
+    type: object
+  tasks.InfoResponse:
+    properties:
+      plan_tasks_limits:
+        additionalProperties:
+          type: integer
+        type: object
+    type: object
+  validation.ErrorResponse:
+    properties:
+      failed_field:
+        type: string
+      tag:
         type: string
     type: object
 host: localhost:8080
@@ -126,7 +137,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Returns all tasks
+      description: Returns all tasks the user has created. If the user is an admin,
+        all tasks will be returned
       produces:
       - application/json
       responses:
@@ -136,11 +148,15 @@ paths:
             items:
               $ref: '#/definitions/database.Task'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/database.MessageStruct'
         "500":
           description: Internal server error while getting tasks
           schema:
             $ref: '#/definitions/database.MessageStruct'
-      summary: Get all tasks
+      summary: Get all user has access to
       tags:
       - tasks
     post:
@@ -167,6 +183,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/database.Task'
+        "400":
+          description: Validation failed
+          schema:
+            $ref: '#/definitions/validation.ErrorResponse'
         "500":
           description: Internal server error while creating task
           schema:
@@ -174,11 +194,12 @@ paths:
       summary: Create a task
       tags:
       - tasks
-  /api/v1/task/{uuid}:
+  /api/v1/task/u/{uuid}:
     get:
       consumes:
       - application/json
-      description: Returns a task by uuid
+      description: Returns a task by uuid. UNFINISHED (No auth atm so can't verify
+        if the user can access this task)
       parameters:
       - description: Task UUID
         in: path
@@ -192,11 +213,32 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/database.Task'
+        "400":
+          description: Validation error
+          schema:
+            items:
+              $ref: '#/definitions/validation.ErrorResponse'
+            type: array
         "500":
           description: Internal server error while getting task
           schema:
             $ref: '#/definitions/database.MessageStruct'
       summary: Get a task
+      tags:
+      - tasks
+  /api/v1/tasks/info:
+    get:
+      consumes:
+      - application/json
+      description: Returns information about the tasks
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/tasks.InfoResponse'
+      summary: Get info
       tags:
       - tasks
 swagger: "2.0"

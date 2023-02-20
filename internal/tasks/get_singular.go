@@ -21,7 +21,7 @@ type GetSingularTaskRequest struct {
 // @Accept json
 // @Produce json
 // @Param uuid path string true "Task UUID"
-// @Success 200 {object} database.Task\
+// @Success 200 {object} database.Task
 // @Failure 400 {array} validation.ErrorResponse "Validation error"
 // @Failure 500 {object} database.MessageStruct "Internal server error while getting task"
 // @Router /api/v1/task/u/{uuid} [get]

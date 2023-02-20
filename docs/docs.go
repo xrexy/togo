@@ -110,7 +110,7 @@ const docTemplate = `{
         },
         "/api/v1/task": {
             "get": {
-                "description": "Returns all tasks",
+                "description": "Returns all tasks the user has created. If the user is an admin, all tasks will be returned",
                 "consumes": [
                     "application/json"
                 ],
@@ -120,7 +120,7 @@ const docTemplate = `{
                 "tags": [
                     "tasks"
                 ],
-                "summary": "Get all tasks",
+                "summary": "Get all user has access to",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -129,6 +129,12 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/database.Task"
                             }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/database.MessageStruct"
                         }
                     },
                     "500": {
@@ -178,6 +184,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/database.Task"
                         }
                     },
+                    "400": {
+                        "description": "Validation failed",
+                        "schema": {
+                            "$ref": "#/definitions/validation.ErrorResponse"
+                        }
+                    },
                     "500": {
                         "description": "Internal server error while creating task",
                         "schema": {
@@ -187,9 +199,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/task/{uuid}": {
+        "/api/v1/task/u/{uuid}": {
             "get": {
-                "description": "Returns a task by uuid",
+                "description": "Returns a task by uuid. UNFINISHED (No auth atm so can't verify if the user can access this task)",
                 "consumes": [
                     "application/json"
                 ],
@@ -216,10 +228,42 @@ const docTemplate = `{
                             "$ref": "#/definitions/database.Task"
                         }
                     },
+                    "400": {
+                        "description": "Validation error",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/validation.ErrorResponse"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal server error while getting task",
                         "schema": {
                             "$ref": "#/definitions/database.MessageStruct"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tasks/info": {
+            "get": {
+                "description": "Returns information about the tasks",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Get info",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/tasks.InfoResponse"
                         }
                     }
                 }
@@ -247,17 +291,13 @@ const docTemplate = `{
         "database.MessageStruct": {
             "type": "object",
             "properties": {
-                "created_at": {
-                    "type": "string",
-                    "example": "1620000000"
-                },
-                "error_code": {
-                    "type": "integer",
-                    "example": 400
-                },
                 "error_message": {
                     "type": "string",
                     "example": "User already exists"
+                },
+                "unix": {
+                    "type": "integer",
+                    "example": 1620000000
                 }
             }
         },
@@ -269,18 +309,18 @@ const docTemplate = `{
                     "example": "This is my first task"
                 },
                 "created_at": {
-                    "type": "string",
-                    "example": "1620000000"
+                    "type": "integer",
+                    "example": 1676546709
                 },
                 "title": {
                     "type": "string",
                     "example": "My first task"
                 },
                 "updated_at": {
-                    "type": "string",
-                    "example": "1620000000"
+                    "type": "integer",
+                    "example": 1676546709
                 },
-                "user_uuid": {
+                "user_id": {
                     "description": "Foreign key",
                     "type": "string",
                     "example": "uuidv4"
@@ -301,6 +341,28 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "example": "my_super_secret_password"
+                }
+            }
+        },
+        "tasks.InfoResponse": {
+            "type": "object",
+            "properties": {
+                "plan_tasks_limits": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "validation.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "failed_field": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "string"
                 }
             }
         }
