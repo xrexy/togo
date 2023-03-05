@@ -10,7 +10,7 @@
 @layer base {
   html {
     font-family: 'Monocraft', 'Inter', sans-serif;
-    @apply text-gray-500;
+    @apply bg-black text-gray-200;
   }
 }
 

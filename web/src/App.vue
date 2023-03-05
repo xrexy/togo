@@ -17,6 +17,7 @@ let currentMessageIndex = $ref(0)
 
 const messages: string[] = [
     'Loading',
+    'Loading...',
     'Maybe today...',
     'Maybe tomorrow...',
     'Maybe next week...',
@@ -54,7 +55,7 @@ onBeforeMount(async () => {
     }, i)
 })
 
-function interval(max = 2000, min = 650) {
+function interval(max = 1250, min = 650) {
     return Math.floor(Math.random() * (max - min + 1) + min)
 }
 </script>

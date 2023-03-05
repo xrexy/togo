@@ -1,8 +1,8 @@
 <template>
-    <header class="w-full h-20 border border-orange-400/50 flex items-center justify-between py-4">
+    <header class="w-full h-20 border-b border-orange-400/25 flex items-center justify-between py-4">
         <img class="h-full aspect-square" src="gifs/almond_pet.gif" />
         <div class="flex gap-6 pr-4 items-center">
-            <ul class="flex text-gray-500 gap-4">
+            <ul class="flex gap-4">
                 <li v-for="route in routes">
                     <router-link
                         :to="route.path"
