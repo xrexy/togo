@@ -1,10 +1,10 @@
 <template>
-    <ViewWrapper name="Home">
-        <Home />
+    <ViewWrapper name="Dashboard">
+        <Dashboard />
     </ViewWrapper>
 </template>
 
 <script setup lang="ts">
-import Home from '@components/Home.vue'
+import Dashboard from '@components/Dashboard.vue'
 import ViewWrapper from '@components/ViewWrapper.vue'
 </script>

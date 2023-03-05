@@ -2,8 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-// Reset padding and margin
-* {
-  padding: 0;
-  margin: 0;
+@font-face {
+  font-family: 'Monocraft';
+  src: url('/fonts/Monocraft-no-ligatures.ttf');
+}
+
+@layer base {
+  html {
+    font-family: 'Monocraft', 'Inter', sans-serif;
+    @apply text-gray-500;
+  }
+}
+
+html, body {
+    margin: 0;
+    height: 100%;
 }
