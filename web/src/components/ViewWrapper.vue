@@ -1,5 +1,5 @@
 <template>
-  <div class="pt-4 px-32 min-h-screen">
+  <div class="pt-4 px-32 min-h-[calc(100%-80px)]">
     <h1 class="text-orange-600 font-semibold tracking-widest text-2xl">{{ name }}</h1>
     <slot />
   </div>
