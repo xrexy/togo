@@ -24,8 +24,9 @@ const useAuth = () => {
             // --- Initialize the composable here
 
             const end = Date.now()
-            console.log(`[useAuth] initialized in ${end - start}ms`)
-            setTimeout(() => resolve(), 6*1000)
+            console.debug(`[useAuth] initialized in ${end - start}ms`)
+
+            resolve()
         })
     }
 
